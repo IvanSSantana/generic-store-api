@@ -1,0 +1,4 @@
+git config --global user.name ivanssantana
+git config --global user.email ivansantospriv@gmail.com
+
+dotnet new webapi -o GenericStore.API --use-controllers
