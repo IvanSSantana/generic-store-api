@@ -51,6 +51,14 @@ public class SeedUsuario
         #endregion
 
         #region Usuário-Perfil
+        List<IdentityUserRole<string>> userRoles = [
+            new() {
+                RoleId = "980aa9cb-773b-465f-8dfe-f2d8861b536a",
+                UserId = "3dff3bc1-5936-4b79-abbe-0c8fb51d6845"
+            }
+        ];
+        
+        builder.Entity<IdentityUserRole<string>>().HasData(userRoles);
         #endregion
     }
 }
