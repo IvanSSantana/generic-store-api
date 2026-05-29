@@ -1,3 +1,4 @@
+using GenericStore.API.Data.Seeds;
 using GenericStore.API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -31,5 +32,15 @@ public class AppDbContext : IdentityDbContext<Usuario>
         builder.Entity<IdentityRoleClaim<string>>().ToTable("perfil_regras");
 
         #endregion
+
+        #region Objeto para mock de dados
+
+        SeedUsuario seedUsuario = new(builder);
+        SeedCategoria seedCategoria = new(builder);
+        SeedProduto seedProduto = new(builder);
+
+        #endregion
+
+        
     }
 }
