@@ -1,8 +1,13 @@
+using System.Text;
 using GenericStore.API.Data;
 using GenericStore.API.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
+using Microsoft.OpenApi;
+using System.Security.Cryptography.Xml;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,8 +45,48 @@ builder.Services.AddAuthentication(options =>
       ValidateLifetime = true,
       ValidateIssuerSigningKey = true,
       ValidIssuer = jwtSettings["Issuer"],
-      ValidAudience = jwtSettings["Audience"]
+      ValidAudience = jwtSettings["Audience"],
+      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!))
     };
+});
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "GStore API",
+        Version = "v1",
+        Description = "API de fornecimento de dados dos produtos"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiRefence
+                {
+                    Type = Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                }
+            }, new string[]{}
+        }
+    });
 });
 
 builder.Services.AddControllers();
@@ -50,14 +95,33 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.EnsureCreatedAsync();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
+
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+       c.SwaggerEndpoint("/swagger/v1/swagger.json", "GStore v1");
+       c.RoutePrefix = string.Empty; 
+    });
 }
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
+app.UseCors("AllowAll");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
