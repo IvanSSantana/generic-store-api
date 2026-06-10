@@ -71,21 +71,13 @@ builder.Services.AddSwaggerGen(c =>
         Description = "API de fornecimento de dados dos produtos"
     });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiRefence
-                {
-                    Type = Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                }
-            }, new string[]{}
-        }
+        Description = "Cabeçalho da Autorização JWT. Exemplo: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
     });
 });
 
@@ -104,13 +96,12 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
     app.MapScalarApiReference();
 
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-       c.SwaggerEndpoint("/swagger/v1/swagger.json", "GStore v1");
+       c.SwaggerEndpoint("/swagger/v1/swagger.json", "GStore.API v1");
        c.RoutePrefix = string.Empty; 
     });
 }
