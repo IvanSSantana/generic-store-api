@@ -58,7 +58,11 @@ public class ProdutosController : ControllerBase
         if (oldProduto == null) return NotFound("Produto não encontrada.");
 
         oldProduto.Nome = produto.Nome;
-        oldProduto.CategoriaId = produto.CategoriaId; // Falta lógica de verificar se CategoriaId
+        oldProduto.CategoriaId = produto.CategoriaId; 
+
+        var categoriaNoDb = _context.Categorias.Find(produto.CategoriaId);
+        if (categoriaNoDb == null) return BadRequest("Categoria não encontrada.");
+
         oldProduto.Descricao = produto.Descricao ?? oldProduto.Descricao;
         oldProduto.Qtde = produto.Qtde;
         oldProduto.ValorCusto = produto.ValorCusto;
